@@ -9,6 +9,7 @@
 #include "Key.h"
 #include "Door.h"
 #include "Money.h"
+#include "ExtraLife.h"
 #include "Goal.h"
 #include "AudioManager.h"
 #include "Utility.h"
@@ -189,6 +190,16 @@ void GameplayState::HandleCollision(int newPlayerX, int newPlayerY)
 			}
 			break;
 		}
+		case ActorType::ExtraLife:
+		{
+			ExtraLife* collidedExtraLife = dynamic_cast<ExtraLife*>(collidedActor);
+			assert(collidedExtraLife);
+			AudioManager::GetInstance()->PlayExtraLifeSound();
+			collidedExtraLife->Remove();
+			m_player.IncrementLives();
+			m_player.SetPosition(newPlayerX, newPlayerY);
+			break;
+		}
 		case ActorType::Door:
 		{
 			Door* collidedDoor = dynamic_cast<Door*>(collidedActor);
@@ -265,11 +276,22 @@ void GameplayState::DrawHUD(const HANDLE& console)
 	cout << endl;
 
 	// Top Border
-	for (int i = 0; i < m_pLevel->GetWidth(); ++i)
-	{
-		cout << Level::WAL;
-	}
-	cout << endl;
+	  if (m_pLevel->GetWidth() < 53)
+    {
+        for (int i = 0; i < 53; ++i)
+        {
+            cout << Level::WAL;
+        }
+        cout << endl;
+    }
+    else
+    {
+        for (int i = 0; i < m_pLevel->GetWidth(); ++i)
+        {
+            cout << Level::WAL;
+        }
+        cout << endl;
+    }
 
 	// Left Side border
 	cout << Level::WAL;

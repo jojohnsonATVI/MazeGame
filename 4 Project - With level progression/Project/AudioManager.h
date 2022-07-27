@@ -77,6 +77,13 @@ public:
 		Beep(1568, 50);
 	}
 
+	void PlayExtraLifeSound()
+	{
+		if (!m_SoundOn)
+			return;
+		Beep(2000, 50);
+	}
+
 	void PlayLoseLivesSound()
 	{
 		if (!m_SoundOn)
