@@ -33,7 +33,7 @@ public:
 	int GetYPosition();
 	int* GetXPositionPointer();
 	int* GetYPositionPointer();
-	void SetPosition(int x, int y);
+	virtual void SetPosition(int x, int y);
 
 	ActorColor GetColor() { return m_color; }
 

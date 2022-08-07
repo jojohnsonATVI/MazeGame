@@ -62,7 +62,7 @@ bool Level::Load(std::string levelName, int* playerX, int* playerY)
 		// Read level
 		m_pLevelData = new char[m_width * m_height];
 		levelFile.read(m_pLevelData, (long long)m_width * (long long)m_height);
-		
+
 		// Convert level
 		bool anyWarnings = ConvertLevel(playerX, playerY);
 		if (anyWarnings)
@@ -100,6 +100,44 @@ void Level::Draw()
 			actorCursorPosition.Y = (*actor)->GetYPosition();
 			SetConsoleCursorPosition(console, actorCursorPosition);
 			(*actor)->Draw();
+		}
+	}
+}
+
+void Level::Draw(int playerX, int playerY, int vision)
+{
+	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(console, (int)ActorColor::Regular);
+
+	// Draw the Level
+	for (int y = 0; y < GetHeight(); ++y)
+	{
+		for (int x = 0; x < GetWidth(); ++x)
+		{
+			int indexToPrint = GetIndexFromCoordinates(x, y);
+			if (y < playerY + vision && y > playerY - vision && x < playerX + vision && x > playerX - vision) {
+				cout << m_pLevelData[indexToPrint];
+			}
+			else cout << ' ';
+		}
+		cout << '\n';
+	}
+	cout << flush;
+
+	COORD actorCursorPosition;
+
+	// Draw actors
+	for (auto actor = m_pActors.begin(); actor != m_pActors.end(); ++actor)
+	{
+		if ((*actor)->IsActive())
+		{
+			actorCursorPosition.X = (*actor)->GetXPosition();
+			actorCursorPosition.Y = (*actor)->GetYPosition();
+			SetConsoleCursorPosition(console, actorCursorPosition);
+			if (actorCursorPosition.Y < playerY + vision && actorCursorPosition.Y > playerY - vision && actorCursorPosition.X < playerX + vision && actorCursorPosition.X > playerX - vision) {
+				(*actor)->Draw();
+			}
+			
 		}
 	}
 }
@@ -222,4 +260,31 @@ PlacableActor* Level::UpdateActors(int x, int y)
 	}
 
 	return collidedActor;
+}
+
+PlacableActor* Level::CheckForCollidedActor(int x, int y)
+{
+	PlacableActor* collidedActor = nullptr;
+
+	for (auto actor = m_pActors.begin(); actor != m_pActors.end(); ++actor)
+	{
+		//Should only be one collision at a time for a player
+		if (IsCollisionOccuring(x, y, (*actor), collidedActor))
+			break;
+	}
+
+	return collidedActor;
+}
+
+bool Level::IsCollisionOccuring(int x, int y, PlacableActor* actor, PlacableActor*& previousCollision)
+{
+	if (x == actor->GetXPosition() && y == actor->GetYPosition())
+	{
+		assert(previousCollision == nullptr);
+		previousCollision = actor;
+
+		return true;
+	}
+
+	return false;
 }

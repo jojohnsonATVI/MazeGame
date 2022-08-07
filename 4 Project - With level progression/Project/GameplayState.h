@@ -6,6 +6,10 @@
 #include <windows.h>
 #include <vector>
 #include <string>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+
 
 class StateMachineExampleGame;
 
@@ -16,7 +20,7 @@ class GameplayState : public GameState
 	Player m_player;
 	Level* m_pLevel;
 
-	bool m_beatLevel;
+	bool m_didBeatLevel;
 	int m_skipFrameCount;
 	static constexpr int kFramesToSkip = 2;
 
@@ -31,9 +35,21 @@ public:
 	virtual void Enter() override;
 	virtual bool Update(bool processInput = true) override;
 	virtual void Draw() override;
+protected:
+	void ProcessInput() override;
+	void CheckBeatLevel();
 
 private:
-	void HandleCollision(int newPlayerX, int newPlayerY);
+	void RedrawThreadingInitial();
+	void ProcessInputThreadingInitial();
+	void HandleCollision(int newPlayerX, int newPlayerY, bool proccessInput = false);
 	bool Load();
 	void DrawHUD(const HANDLE& console);
+
+	std::mutex m_collisionGuard;
+	std::mutex m_DrawGuard;
+	std::mutex m_CVSleepGuard;
+	std::mutex m_ProcessInputGuard;
+
+	std::condition_variable m_CVSleep;
 };

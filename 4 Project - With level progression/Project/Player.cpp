@@ -46,9 +46,31 @@ void Player::DropKey()
 	if (m_pCurrentKey)
 	{
 		AudioManager::GetInstance()->PlayKeyDropSound();
-		m_pCurrentKey->Place(m_pPosition->x, m_pPosition->y);
+		m_pCurrentKey->Place(m_pPosition->x - (m_lastDirection == LAST_DIRECTION::RIGHT) + (m_lastDirection == LAST_DIRECTION::LEFT), m_pPosition->y - (m_lastDirection == LAST_DIRECTION::UP) + (m_lastDirection == LAST_DIRECTION::DOWN));
 		m_pCurrentKey = nullptr;
 	}
+}
+
+void Player::SetPosition(int x, int y)
+{
+	if (x < m_pPosition->x && y == m_pPosition->y)
+	{
+		m_lastDirection = LAST_DIRECTION::LEFT;
+	}
+	else if (x == m_pPosition->x && y > m_pPosition->y)
+	{
+		m_lastDirection = LAST_DIRECTION::UP;
+	}
+	else if (x == m_pPosition->x && y < m_pPosition->y)
+	{
+		m_lastDirection = LAST_DIRECTION::DOWN;
+	}
+	else
+	{
+		m_lastDirection = LAST_DIRECTION::RIGHT;
+	}
+
+	PlacableActor::SetPosition(x, y);
 }
 
 void Player::Draw()
